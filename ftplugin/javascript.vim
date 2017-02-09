@@ -6,7 +6,7 @@ let s:local_eslint = finddir('node_modules', '.;') . '/.bin/eslint'
 
 " if the found path is relative
 if matchstr(s:local_eslint, "^\/\\w") == ''
-  let s:local_eslint = fnameescape(getcwd()) . "/" . local_eslint
+  let s:local_eslint = fnameescape(getcwd()) . "/" . s:local_eslint
 endif
 
 if executable(s:local_eslint)
