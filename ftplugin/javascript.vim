@@ -1,5 +1,5 @@
 "" @see http://stackoverflow.com/questions/18807349/a-reduce-function-in-vim-script
-fun s:Reduce(funcname, list, acc)
+fun! s:Reduce(funcname, list, acc)
     let l:F = function(a:funcname)
     let l:acc = a:acc
     for l:value in a:list[:]
@@ -8,7 +8,7 @@ fun s:Reduce(funcname, list, acc)
     return l:acc
 endfun
 
-function s:GetNodeModulesAbsPath ()
+fun! s:GetNodeModulesAbsPath ()
   let lcd_saved = fnameescape(getcwd())
   silent! exec "lcd" expand('%:p:h')
   let l:node_modules_path = finddir('node_modules', '.;')
@@ -20,7 +20,7 @@ function s:GetNodeModulesAbsPath ()
   else
     return l:node_modules_path
   endif
-endfunction
+endfun
 
 " syntastic_checker[]
 " -> s:DescribeLocalChecker(acc_dict, checker)
@@ -29,19 +29,19 @@ endfunction
 
 let s:node_modules_path = s:GetNodeModulesAbsPath()
 
-fun s:GetLocalBin (checker)
+fun! s:GetLocalBin (checker)
   let l:checker_bin =  s:node_modules_path . '/.bin/' . a:checker
   return executable(l:checker_bin) ? l:checker_bin : ''
 endfun
 
-fun s:DescribeLocalChecker (acc, checker)
+fun! s:DescribeLocalChecker (acc, checker)
   let l:acc = a:acc
   let l:checker_bin = s:GetLocalBin(a:checker)
   let l:acc[a:checker] = l:checker_bin
   return l:acc
 endfun
 
-fun s:SetCheckers (checkers)
+fun! s:SetCheckers (checkers)
   for [l:name, l:bin] in items(a:checkers)
     if l:bin !=# ''
       exec 'let b:syntastic_javascript_' . l:name . '_exec = "' . l:bin . '"'
@@ -51,7 +51,7 @@ fun s:SetCheckers (checkers)
   endfor
 endfun
 
-fun s:Main ()
+fun! s:Main ()
   " TODO check if syntastic installed
   let l:checker_names = g:syntastic_javascript_checkers
   let l:checkers = s:Reduce('s:DescribeLocalChecker', l:checker_names, {})
