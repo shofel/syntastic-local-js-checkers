@@ -52,10 +52,9 @@ fun! s:SetCheckers (checkers)
 endfun
 
 fun! s:Main ()
-  " TODO check if syntastic installed
-  let l:checker_names = g:syntastic_javascript_checkers
-  let l:checkers = s:Reduce('s:DescribeLocalChecker', l:checker_names, {})
-  call s:SetCheckers(l:checkers)
+  let checker_names = get(g:, 'syntastic_javascript_checkers', [])
+  let checkers = s:Reduce('s:DescribeLocalChecker', checker_names, {})
+  call s:SetCheckers(checkers)
 endfun
 
 call s:Main()
