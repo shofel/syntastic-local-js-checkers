@@ -11,10 +11,9 @@ fun! s:GetNodeModulesAbsPath ()
   let lcd_saved = fnameescape(getcwd())
   silent! exec "lcd" expand('%:p:h')
   let path = finddir('node_modules', '.;')
-  let abs_path = fnamemodify(path, ':p')
   exec "lcd" lcd_saved
 
-  return abs_path
+  return path is '' ? v:null : fnamemodify(path, ':p')
 endfun
 
 " syntastic_checker[]
@@ -24,7 +23,7 @@ endfun
 
 fun! s:GetLocalBin (node_modules_path, checker)
   let checker_bin =  a:node_modules_path . '/.bin/' . a:checker
-  return executable(checker_bin) ? checker_bin : ''
+  return executable(checker_bin) ? checker_bin : v:null
 endfun
 
 fun! s:DescribeLocalChecker (node_modules, acc, checker)
@@ -36,21 +35,27 @@ endfun
 
 fun! s:SetCheckers (checkers)
   for [name, bin] in items(a:checkers)
-    if bin !=# ''
-      exec 'let b:syntastic_javascript_' . name . '_exec = "' . bin . '"'
-    else
+    if bin is v:null
       echoerr 'Javascript checkers: no local ' . name . ' found'
+    else
+      exec 'let b:syntastic_javascript_' . name . '_exec = "' . bin . '"'
     endif
   endfor
 endfun
 
-
 fun! s:Main ()
   let checker_names = get(g:, 'syntastic_javascript_checkers', [])
-  let s:LocalChecker = function('s:DescribeLocalChecker', [s:GetNodeModulesAbsPath()])
+  let node_modules = s:GetNodeModulesAbsPath()
 
-  let checkers = s:Reduce(s:LocalChecker, checker_names, {})
-  call s:SetCheckers(checkers)
+  if expand('%:p') =~# 'fugitive://.\*'
+    return
+  elseif node_modules is v:null " we're outside of any js project
+    return
+  else
+    let s:LocalChecker = function('s:DescribeLocalChecker', [node_modules])
+    let checkers = s:Reduce(s:LocalChecker, checker_names, {})
+    call s:SetCheckers(checkers)
+  endif
 endfun
 
 call s:Main()
