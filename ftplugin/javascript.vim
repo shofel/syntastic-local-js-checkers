@@ -10,15 +10,11 @@ endfun
 fun! s:GetNodeModulesAbsPath ()
   let lcd_saved = fnameescape(getcwd())
   silent! exec "lcd" expand('%:p:h')
-  let node_modules_path = finddir('node_modules', '.;')
+  let path = finddir('node_modules', '.;')
+  let abs_path = fnamemodify(path, ':p')
   exec "lcd" lcd_saved
 
-  " if the found path is relative
-  if matchstr(node_modules_path, "^\/\\w") == ''
-    return fnameescape(getcwd()) . "/" . node_modules_path
-  else
-    return node_modules_path
-  endif
+  return abs_path
 endfun
 
 " syntastic_checker[]
