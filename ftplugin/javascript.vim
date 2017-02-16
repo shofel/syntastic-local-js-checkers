@@ -36,7 +36,7 @@ endfun
 fun! s:SetCheckers (checkers)
   for [name, bin] in items(a:checkers)
     if bin is v:null
-      echoerr 'Javascript checkers: no local ' . name . ' found'
+      echo 'Javascript checkers: no local ' . name . ' found'
     else
       exec 'let b:syntastic_javascript_' . name . '_exec = "' . bin . '"'
     endif
@@ -47,9 +47,7 @@ fun! s:Main ()
   let checker_names = get(g:, 'syntastic_javascript_checkers', [])
   let node_modules = s:GetNodeModulesAbsPath()
 
-  if expand('%:p') =~# 'fugitive://.\*'
-    return
-  elseif node_modules is v:null " we're outside of any js project
+  if node_modules is v:null " we're outside of any js project
     return
   else
     let s:LocalChecker = function('s:DescribeLocalChecker', [node_modules])
