@@ -33,17 +33,43 @@ fun! s:DescribeLocalChecker (node_modules, acc, checker)
   return acc
 endfun
 
-fun! s:SetCheckers (checkers)
+fun! s:SetCheckers (checkers, politeness)
   for [name, bin] in items(a:checkers)
     if bin is v:null
-      echo 'Javascript checkers: no local ' . name . ' found'
+      let message = 'Syntastic local javascript checkers: no local ' . name . ' found'
+      call s:Echo(a:politeness, message)
     else
       exec 'let b:syntastic_javascript_' . name . '_exec = "' . bin . '"'
     endif
   endfor
 endfun
 
+" Delivery the message to the user
+"
+" politeness is a number: 0, 1, or 2.
+" When 'node_modules' no local executable for a checker was found, the plugin will inform
+" the user about that. How this is done depends on the [politeness] setting:
+" 2: be silent, don't show any messages
+" 1: echo message 'Syntastic local javascript checker: no local {checker} found'
+" 0: echoerr the same message
+" Default politeness is 2
+" NOTE: when node_modules not found at all, then there is no errors
+fun! s:Echo (politeness, message)
+  if a:politeness =~ 2
+    return
+  elseif a:politeness =~ 1
+    echo a:message
+    return
+  elseif a:politeness =~ 0
+    echoerr a:message
+    return
+  else
+    echoerr 'g:syntastic_local_javascript_checkers_politeness should be 0, 1, or 2'
+  endif
+endfun
+
 fun! s:Main ()
+  let politeness = get(g:, 'syntastic_local_javascript_checkers_politeness', 2)
   let checker_names = get(g:, 'syntastic_javascript_checkers', [])
   let node_modules = s:GetNodeModulesAbsPath()
 
@@ -52,7 +78,7 @@ fun! s:Main ()
   else
     let s:LocalChecker = function('s:DescribeLocalChecker', [node_modules])
     let checkers = s:Reduce(s:LocalChecker, checker_names, {})
-    call s:SetCheckers(checkers)
+    call s:SetCheckers(checkers, politeness)
   endif
 endfun
 
