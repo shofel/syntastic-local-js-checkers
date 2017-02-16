@@ -1,4 +1,4 @@
-# syntastic-local-js-checkers.vim
+# syntastic-local-js-checkers
 For each buffer with javascript file use all the javascript checkers from node_modules of the project
 
 0. Find `node-modules` of the project. If not found, then do nothing: we're not in a project.
